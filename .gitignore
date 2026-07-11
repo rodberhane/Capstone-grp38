@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# raw data lives here locally but is NOT committed (1.7GB; download per docs/01_data_sources.md)
+/data/
+
+# figures are regenerated (small result CSVs under artifacts/ are kept as reference)
+artifacts/**/*.png
+BERPublicSearch/

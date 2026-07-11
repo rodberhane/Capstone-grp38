@@ -1,0 +1,23 @@
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+geopandas
+rasterio
+pyproj
+requests
+openpyxl
+xgboost
+pygam
+lightgbm
+catboost
+shap
+streamlit
+plotly
+# optional, only for the OS2 Danish shape prior in harmonisation:
+# psycopg2-binary
+# optional, only for the true Linear-Gaussian Bayesian Network in vulnerability_model_extended.py
+# (pulls in torch + google-generativeai transitively; the script falls back to sklearn's
+# BayesianRidge, already covered by scikit-learn above, if this is not installed):
+# pgmpy
