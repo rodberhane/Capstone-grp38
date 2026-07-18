@@ -346,7 +346,11 @@ def build_model_curves_figure(metrics: pd.DataFrame, curves: pd.DataFrame, ref: 
 
 
 def deployment_inputs_present() -> bool:
-    required = [config.ARTIFACTS / "deployment" / "dublin_damage_by_sa.csv", config.SAPS_GPKG, config.SAPS_CSV, config.EXPOSURE_PROFILES]
+    required = [
+        config.ARTIFACTS / "deployment" / "dublin_damage_by_sa.csv",
+        config.ARTIFACTS / "deployment" / "dublin_sa_geometry.json",
+        config.EXPOSURE_PROFILES,
+    ]
     return all(path.exists() for path in required)
 
 
@@ -360,15 +364,13 @@ def dublin_key_column(gdf: gpd.GeoDataFrame) -> str | None:
 
 def load_dublin_geometry_and_inputs() -> tuple[gpd.GeoDataFrame | None, pd.DataFrame | None, pd.DataFrame | None]:
     dmg_path = config.ARTIFACTS / "deployment" / "dublin_damage_by_sa.csv"
-    if not dmg_path.exists() or not config.SAPS_GPKG.exists() or not config.SAPS_CSV.exists() or not config.EXPOSURE_PROFILES.exists():
+    geom_path = config.ARTIFACTS / "deployment" / "dublin_sa_geometry.json"
+    if not dmg_path.exists() or not geom_path.exists() or not config.EXPOSURE_PROFILES.exists():
         return None, None, None
     try:
         damage = load_optional_csv(dmg_path)
         exposure = load_optional_csv(config.EXPOSURE_PROFILES)
-        try:
-            gdf = gpd.read_file(config.SAPS_GPKG, bbox=(712000, 728000, 730000, 745000))
-        except Exception:
-            gdf = gpd.read_file(config.SAPS_GPKG)
+        gdf = gpd.read_file(geom_path)
         return gdf, damage, exposure
     except Exception:
         return None, None, None
@@ -448,7 +450,7 @@ def deployment_costs_for_model(
             m2["lo"] += n * area_by_type.get(t, 90.0) * lo
             m2["mid"] += n * area_by_type.get(t, 90.0) * mid
             m2["hi"] += n * area_by_type.get(t, 90.0) * hi
-        lo, mid, hi, label = model_curve_band(curves, quantiles, ref, model, "Apartment", depth)
+        lo, hi, label = model_curve_band(curves, quantiles, ref, model, "Apartment", depth)
         mid_val = model_curve_value(curves, model, "Apartment", depth)
         m2["lo"] += fa_count * area_by_type.get("Apartment", 70.0) * lo
         m2["mid"] += fa_count * area_by_type.get("Apartment", 70.0) * mid_val
@@ -635,7 +637,7 @@ def main() -> None:
             selected_damage = deployment_costs_for_model(
                 damage_base,
                 exposure,
-                ref if ref is not None else pd.DataFrame(),
+                curves if curves is not None else pd.DataFrame(),
                 quantiles,
                 ref,
                 selected_model,
