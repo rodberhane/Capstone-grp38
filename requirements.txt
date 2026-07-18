@@ -9,3 +9,4 @@ requests
 openpyxl
 streamlit
 plotly
+xgboost
